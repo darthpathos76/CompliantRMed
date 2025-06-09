@@ -1,0 +1,154 @@
+---
+title: "Validation Report: Testing assertthat and Custom Functions"
+author: Chris Battiston, Research Database Administrator
+date: "June 11, 2025"
+format: 
+  html: default
+  docx: default
+execute: 
+  echo: true
+warning: false
+message: false
+---
+
+## 1. Introduction
+
+
+  This document presents a validation report for selected R functions and packages using the `testthat` framework. The goal is to ensure that these functions behave as expected under defined inputs and edge cases.
+
+## 2. Test Environment
+
+``` {r}
+library(knitr)
+
+kable(data.frame(
+  Component = c(
+    "R Version", 
+    "Platform", 
+    "Packages Tested", 
+    "Test Framework", 
+    "Operating System"
+  ),
+  Details = c(
+    as.character(getRversion()),
+    R.version$platform,
+    "assertthat, custom functions",
+    "testthat",
+    Sys.info()[["sysname"]]
+  )
+))
+
+```
+
+## 3. Validation Objectives
+
+  - Confirm `assert_that()` behaves correctly with valid and invalid conditions.
+- Validate custom functions used in clinical/statistical workflows.
+- Provide reproducible, auditable test results.
+- Demonstrate test-driven validation for regulatory readiness.
+
+---
+## 4. Test Cases and Scripts
+
+```r
+library(testthat)
+library(assertthat)
+
+# Test 1: Basic TRUE condition passes silently
+test_that("Basic TRUE condition passes silently", {
+  expect_silent(assert_that(1 == 1))
+})
+
+# Test 2: FALSE condition throws expected error
+test_that("False condition throws an error", {
+  expect_error(assert_that(1 == 2), regexp = "not equal")
+})
+
+# Custom function: calculate_bmi
+calculate_bmi <- function(weight, height) {
+  assert_that(weight > 0, height > 0)
+  weight / (height^2)
+}
+
+test_that("calculate_bmi returns correct result", {
+  expect_equal(calculate_bmi(70, 1.75), 22.85714, tolerance = 1e-4)
+})
+
+test_that("calculate_bmi throws error for invalid input", {
+  expect_error(calculate_bmi(-70, 1.75), regexp = "weight > 0")
+})
+
+# Custom function: convert_temperature
+convert_temperature <- function(temp, to = "F") {
+  assert_that(is.numeric(temp))
+  assert_that(to %in% c("F", "C"))
+
+  if (to == "F") {
+    return(temp * 9/5 + 32)
+  } else {
+    return((temp - 32) * 5/9)
+  }
+}
+
+test_that("convert_temperature works for valid inputs", {
+  expect_equal(convert_temperature(0, "F"), 32)
+  expect_equal(convert_temperature(32, "C"), 0)
+})
+
+test_that("convert_temperature fails for invalid input", {
+  expect_error(convert_temperature("cold", "F"), regexp = "is.numeric")
+  expect_error(convert_temperature(20, "K"), regexp = "to %in%")
+})
+```
+
+## 5. Test Cases and Scripts - Outputs
+```{r, error=TRUE}
+library(testthat)
+library(assertthat)
+
+# Test 1: Basic TRUE condition passes silently
+test_that("Basic TRUE condition passes silently", {
+  expect_silent(assert_that(1 == 1))
+})
+
+# Test 2: FALSE condition throws expected error
+test_that("False condition throws an error", {
+expect_error(assert_that(1 == 2), regexp = "not equal")
+})
+
+# Custom function: calculate_bmi
+calculate_bmi <- function(weight, height) {
+  assert_that(weight > 0, height > 0)
+  weight / (height^2)
+}
+
+test_that("calculate_bmi returns correct result", {
+  expect_equal(calculate_bmi(70, 1.75), 22.85714, tolerance = 1e-4)
+})
+
+test_that("calculate_bmi throws error for invalid input", {
+  expect_error(calculate_bmi(-70, 1.75), regexp = "weight > 0")
+})
+
+# Custom function: convert_temperature
+convert_temperature <- function(temp, to = "F") {
+  assert_that(is.numeric(temp))
+  assert_that(to %in% c("F", "C"))
+  if (to == "F") {
+    return(temp * 9/5 + 32)
+  } else {
+    return((temp - 32) * 5/9)
+  }
+}
+
+test_that("convert_temperature works for valid inputs", {
+  expect_equal(convert_temperature(0, "F"), 32)
+  expect_equal(convert_temperature(32, "C"), 0)
+})
+
+test_that("convert_temperature fails for invalid input", {
+  expect_error(convert_temperature("cold", "F"), regexp = "is.numeric")
+  expect_error(convert_temperature(20, "K"), regexp = "to %in%")
+})
+```
+

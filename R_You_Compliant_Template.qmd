@@ -1,0 +1,19 @@
+---
+title: "R You Compliant? Validating Packages for Regulatory Readiness"
+author: "Chris Battiston"
+format: revealjs
+editor: visual
+---
+
+## Validation Summary (Template)
+
+- **Package:** assertthat  
+- **Version:** 0.2.1  
+- **Source:** CRAN  
+- **Purpose:** Input validation  
+- **Risk Level:** Medium  
+- **Tests Conducted:** 4  
+- **Environment:** R 4.3.3, Windows 10, renv locked  
+- **Reviewed By:** [Name]  
+- **Date:** [Date]  
+

@@ -1,0 +1,254 @@
+---
+title: "R You Compliant? Validating Packages for Regulatory Readiness"
+author: "Chris Battiston"
+email: "chris.battiston@wchospital.ca"
+format: 
+  revealjs:
+    theme: simple
+    slide-number: true
+    transition: slide
+editor: visual
+---
+
+## Welcome
+
+-   Purpose: Show how to test and validate R packages for use in clinical environments\
+-   Aim: To walk through validation approaches using the `assertthat` package
+
+------------------------------------------------------------------------
+
+## Why Validate?
+
+-   R is open source — many packages are:
+    -   Not formally tested\
+    -   Maintained by individuals\
+-   Clinical trial environments require:
+    -   Verified tools\
+    -   Documented validation\
+    -   **Repeatable results**
+
+------------------------------------------------------------------------
+
+## When Is Validation Required?
+
+-   Any R package used in:
+    -   Data analysis submitted to regulatory bodies\
+    -   Statistical programming for endpoints\
+    -   Data cleaning or transformation steps\
+-   Applies to:
+    -   Internal packages\
+    -   CRAN packages\
+    -   GitHub packages (higher risk!)
+
+------------------------------------------------------------------------
+
+## Regulatory Context
+
+-   **FDA Guidance** on Computerized Systems in Clinical Investigations\
+-   **ICH E6(R3)** – Data integrity, system validation\
+-   **ICH E9** – Statistical principles and reproducibility\
+-   **21 CFR Part 11** – Electronic records and audit trails
+
+------------------------------------------------------------------------
+
+## A Quick Note
+
+> The FDA’s “R: Regulatory Compliance and Validation Issues” applies **only to the base R distribution**\
+> But the philosophy behind it can still guide validation for external and internal packages.\
+> That’s the motivation behind this session.
+
+------------------------------------------------------------------------
+
+## What Needs to Be Proven
+
+-   Package is suitable for intended use\
+-   Key functions behave as expected\
+-   Input/output integrity is maintained\
+-   Errors are handled gracefully\
+-   Environment is documented and controlled
+
+------------------------------------------------------------------------
+
+## Validation Depends on Risk
+
+-   Not all packages require the same depth of validation\
+-   Risk = combination of:
+    -   Impact on primary endpoints\
+    -   Source and complexity\
+    -   Intended use (internal vs. submission)\
+-   Examples:
+    -   **Low Risk** – plotting, QA scripts\
+    -   **Medium Risk** – cleaning, reshaping\
+    -   **High Risk** – statistical outputs for submission
+
+------------------------------------------------------------------------
+
+## Validation Strategy
+
+-   Step 1: Document the Package\
+-   Step 2: Identify Key Functions\
+-   Step 3: Write Tests\
+-   Step 4: Run in Controlled Environment\
+-   Step 5: Record Results\
+-   Step 6: Review and Approve
+
+------------------------------------------------------------------------
+
+## Step 1: Document the Package
+
+-   Name, version, source\
+-   License (CRAN, GitHub, internal)\
+-   Dependencies\
+-   Intended use\
+-   Risk classification
+
+------------------------------------------------------------------------
+
+## Step 2: Identify Key Functions
+
+-   Which functions do you actually use?\
+-   Examples:
+    -   `survival::coxph` for statistical modeling\
+    -   `assertthat::assert_that` for validation\
+    -   `ggplot2::ggplot` for data visualization
+
+------------------------------------------------------------------------
+
+## Step 3: Write Tests
+
+-   Use `testthat`, `tinytest`, or similar\
+-   Validate:
+    -   Expected output\
+    -   Error handling\
+    -   Edge cases\
+-   Don’t rely only on author-supplied tests
+
+------------------------------------------------------------------------
+
+## Step 4: Run in Controlled Environment
+
+-   Use reproducible infrastructure:
+    -   DEV/test server\
+    -   Docker container\
+    -   Controlled VM\
+-   Lock R version and packages with `renv`\
+-   Log session info with `sessioninfo`
+
+------------------------------------------------------------------------
+
+## Step 5: Record Results
+
+-   Save:
+    -   Test scripts\
+    -   Output logs\
+    -   Session info\
+-   Use `capture.output()`, `test_dir()`, or `with_reporter()`\
+-   Digitally sign if required by SOP
+
+------------------------------------------------------------------------
+
+## Step 6: Review and Approve
+
+-   Internal QA or statistical lead should:
+    -   Review validation artifacts\
+    -   Sign off summary\
+    -   File in eTMF or SOP-controlled folder
+
+------------------------------------------------------------------------
+
+## Tooling for Reproducibility
+
+-   `renv::init()` – Lock package versions\
+-   `devtools::check()` – Run checks for internal packages\
+-   `sessioninfo::session_info()` – Capture platform state\
+-   Ensures:
+    -   Traceability\
+    -   Reproducibility\
+    -   Environment control
+
+------------------------------------------------------------------------
+
+## Version Control and Change Management
+
+-   Track package versions, changes, and approvals
+
+**Use Git to:**
+
+-   Commit validation changes\
+-   Tag releases\
+-   Collaborate with QA\
+-   Document reasons for upgrades\
+-   Archive older validations if replaced
+
+------------------------------------------------------------------------
+
+## Case Study: Validating `assertthat`
+
+### Package Overview
+
+-   **Package**: `assertthat`\
+-   **Version**: 0.2.1\
+-   **License**: MIT\
+-   **Purpose**: Input validation and readable assertions\
+-   **Dependencies**: base R only\
+-   **Maintainer**: Hadley Wickham
+
+## Code Review
+
+``` r
+library(testthat)
+library(assertthat)
+
+test_that("assert_that passes when TRUE", {
+  expect_silent(assert_that(1 == 1))
+})
+
+test_that("assert_that fails when FALSE", {
+  expect_error(assert_that(1 == 2), regexp = "not equal")
+})
+```
+
+```{r}
+library(testthat)
+library(assertthat)
+
+test_that("assert_that passes when TRUE", {
+  expect_silent(assert_that(1 == 1))
+})
+
+test_that("assert_that fails when FALSE", {
+  expect_error(assert_that(1 == 2), regexp = "not equal")
+})
+```
+
+------------------------------------------------------------------------
+
+## Description of the Code
+
+-   `testthat` checks the behavior of `assert_that()`
+-   First test: should pass silently
+-   Second test: should raise an error
+-   These are examples of verifying intended behavior
+-   Demonstrates how even small packages require validation
+
+::: notes
+Use `expect_silent()` to confirm no output or warnings occur.\
+Seeing a 😀 or ✅ means the test framework worked — not the function.\
+That distinction matters in regulated environments.
+:::
+
+## Code Demo / walkthrough
+
+![](images/clipboard-1432825567.png)
+
+## Key Takeaways
+
+-   Validation should reflect package risk and intended use\
+-   Use R-native tools to document and automate testing\
+-   Record and version everything\
+-   Partner with QA early in the process\
+-   Good documentation beats complexity every time
+
+## Contact Info
+
+I'd love to hear from you - how you're validating, tools you've used, auditor's findings you can share - so please email me at chris.battiston@wchospital.ca!  
